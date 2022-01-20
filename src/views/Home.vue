@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <div v-if="off">
+  <div class="relative">
+    <div v-if="off" :class="{ backdrop: !showModal }">
       <div class="h-64 bg-blue-400 flex">
         <div class="m-auto w-full">
           <h1 class="text-3xl w-2/4 font-bold" v-if="valid">
@@ -35,42 +35,74 @@
 
       <div>
         <div class="-mt-28 relative">
-          <div v-if="isLoading" class="grids mx-64">
-            <div id="card-template" v-for="index in 8" :key="index">
-              <div class="contain">
-                <div class="boxs">
-                  <!-- <img  src="2.png" alt="" /> -->
+          <div class="grids mx-64">
+            <div id="card-template" v-for="newimage in results" :key="newimage">
+              <div class="mb-22 contain">
+                <div>
+                  <img
+                    @click="test(newimage)"
+                    class="boxs"
+                    :src="newimage.urls.small"
+                    alt=""
+                  />
+                </div>
+
+                <div class="text">
+                  <h1 class="">
+                    {{ newimage.user.name }}
+                  </h1>
+                  <h3 class="">
+                    {{ newimage.user.location }}
+                  </h3>
+                </div>
+              </div>
+            </div>
+          </div>
+          <transition name="appear">
+            <div class="simple-modal" v-if="!showModal">
+              <div @click="showModal = !showModal">
+                <svg
+                  style="
+                    width: 25px;
+                    color: red;
+                    position: absolute;
+                    z-index: 10;
+                    top: 10px;
+                    right: 10px;
+                    cursor: pointer;
+                    font-weight: 100;
+                  "
+                  aria-hidden="true"
+                  focusable="false"
+                  data-prefix="fas"
+                  data-icon="times"
+                  class="svg-inline--fa fa-times fa-w-11"
+                  role="img"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 352 512"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"
+                  ></path>
+                </svg>
+              </div>
+              <div class="contain_unique">
+                <div>
+                  <img class="boxs_unique" :src="unique" alt="" />
                 </div>
                 <div class="text">
-                  <h1 class="skeleton skeleton-text"></h1>
-
-                  <h3 class="skeleton skeleton-text"></h3>
+                  <h1 class="">{{ name }}</h1>
+                  <h3 class="">{{ location }}</h3>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="grids mx-64">
-            <div
-              class="mb-22 contain"
-              v-for="newimage in results"
-              :key="newimage"
-            >
-              <img class="boxs bg-black" :src="newimage.urls.small" alt="" />
-              <div class="text">
-                <h1 class="">
-                  {{ newimage.user.name }}
-                </h1>
-                <h3 class="">
-                  {{ newimage.user.location }}
-                </h3>
-              </div>
-            </div>
-          </div>
+          </transition>
         </div>
       </div>
     </div>
 
-    <div v-else>
+    <div v-else :class="{ backdrop: !showModal }">
       <div class="h-64 bg-blue-400 flex">
         <div class="m-auto w-full">
           <input
@@ -85,15 +117,14 @@
         </div>
       </div>
       <div class="-mt-32 relative">
-        <div v-if="isLoading" class="grids mx-64">
+        <div class="grids mx-64">
           <div id="card-template" v-for="index in 8" :key="index">
-            <div class="contain">
+            <div v-if="isLoading" class="contain">
               <div class="boxs">
-                <!-- <img  src="2.png" alt="" /> -->
+                <img src="2.png" alt="" />
               </div>
               <div class="text">
                 <h1 class="skeleton skeleton-text"></h1>
-
                 <h3 class="skeleton skeleton-text"></h3>
               </div>
             </div>
@@ -103,7 +134,12 @@
           <div id="card-template" v-for="pred in preloads" :key="pred">
             <div class="contain">
               <div>
-                <img class="boxs bg-black" :src="pred.urls.small" alt="" />
+                <img
+                  @click="test(pred)"
+                  class="boxs"
+                  :src="pred.urls.small"
+                  alt=""
+                />
               </div>
               <div class="text">
                 <h1 class="">{{ pred.user.name }}</h1>
@@ -112,24 +148,48 @@
             </div>
           </div>
         </div>
-      </div>
-      <!-- <div class="-mt-28">
-        <div class="grids mx-64">
-          <div v-for="pre in preloads" :key="pre">
-            <div class="contain">
-              <img class="skeleton mb-10" :src="pre.urls.full" alt="" />
-              <div class="text-left ml-2 -mt-28">
-                <h1 class="text-2xl skeleton skeleton-text text-white">
-                  {{ pre.user.name }}
-                </h1>
-                <h3 class="text-white skeleton skeleton-text">
-                  {{ pre.user.location }}
-                </h3>
+        <!--  modal -->
+        <transition name="appear">
+          <div class="simple-modal" v-if="!showModal">
+            <div>
+              <svg
+                style="
+                  width: 25px;
+                  color: red;
+                  position: absolute;
+                  z-index: 10;
+                  top: 10px;
+                  right: 10px;
+                  cursor: pointer;
+                "
+                @click="showModal = !showModal"
+                aria-hidden="true"
+                focusable="false"
+                data-prefix="fas"
+                data-icon="times"
+                class="svg-inline--fa fa-times fa-w-11"
+                role="img"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 352 512"
+              >
+                <path
+                  fill="currentColor"
+                  d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"
+                ></path>
+              </svg>
+            </div>
+            <div class="contain_unique">
+              <div>
+                <img class="boxs_unique" :src="unique" alt="" />
+              </div>
+              <div class="text">
+                <h1 class="">{{ name }}</h1>
+                <h3 class="">{{ location }}</h3>
               </div>
             </div>
           </div>
-        </div>
-      </div> -->
+        </transition>
+      </div>
     </div>
   </div>
 </template>
@@ -149,10 +209,14 @@ export default {
       isLoading: true,
       error: "",
       valid: "",
+      showModal: true,
+      unique: "",
+      name: "",
+      location: "",
     };
   },
   created() {
-    setTimeout(() => this.showInfo(), 5000);
+    setTimeout(() => this.showInfo(), 1000);
     // this.showInfo();
   },
   methods: {
@@ -173,107 +237,33 @@ export default {
       this.off = false;
       this.search = "";
       this.results = "";
-      // this.valid = "";
     },
     showInfo: async function () {
       this.isLoading = !this.isLoading;
       // this.isLoading = false;
       const url =
-        "https://api.unsplash.com/search/photos?query=seek/300x300&client_id=WK1deDueE4CqISx62oA732H6X09oUokqoq9psv3W1rw&per_page=8";
+        "https://api.unsplash.com/search/photos?query=africa/300x300&client_id=WK1deDueE4CqISx62oA732H6X09oUokqoq9psv3W1rw&per_page=8";
       const preload = await axios.get(url);
       this.preloads = this.isLoading ? "" : preload.data.results;
       console.log(preload.data.results);
+    },
+
+    test(data) {
+      this.showModal = !this.showModal;
+      this.unique = data.urls.full;
+      this.name = data.user.name;
+      this.location = data.user.location;
+      console.log(data.user.name);
     },
   },
 };
 </script>
 <style>
-/* .boxes img {
-  border-radius: 20px;
-  text-align: left;
-  color: white;
-  box-shadow: 1px 10px 15px -10px rgba(34, 33, 33, 0.363);
-}
-
-.boxes:empty {
-  width: 300px;
-  height: 300px;
-  background-image: linear-gradient(#ccc, #ccc);
-  background-image: linear-gradient(#f5f4f5, #ccc);
-  background-size: 48px 48px, 100% 100%;
-  background-position: 50% 24px, 15px 140px, 15px 200px, 0 0;
-  background-repeat: no-repeat;
-}
-
-.boxes:empty::after {
-  width: 300px;
-  height: 300px;
-  background-image: linear-gradient(to left, #ccc, rgb(180, 175, 175));
-  background-size: 200% 200%;
-  animation: loadings 1s infinite;
-}
-
-@keyframes loadings {
-  0% {
-    background-position: 0% 50%;
-  }
-  100% {
-    background-position: -200% 0%;
-  }
-} */
-/* .card.-loading .card_avatar img,
-.card.-loading h1,
-.card.-loading h3 {
-  background: #e9edf1;
-  background: linear-gradient(90deg, #e9edf1 7%, #eff2f4 12%, #e9edf1 37%);
-  background-size: 200% 100%;
-  animation: 1.5s shimmer linear infinite;
-}
-.card.-loading .card_content h1,
-.card.-loading h3 {
-  border-radius: 6px;
-}
-.card.-loading .card_avatar img {
-  display: none;
-}
-@keyframes shimmer {
-  to {
-    background-position-x: -200%;
-  }
-}
-
-.card_content {
-  margin-top: 1.8rem;
-  text-align: center;
-  width: 80%;
-}
-.card_content h1 {
-  font-size: 30px;
-  height: 30px;
-  margin-top: -130px;
-}.card_avatar {
-  width: 300px;
-  height: 300px;
-  border-radius: 10%;
-  overflow: hidden;
-}
-.card_avatar img {
-  width: 300px;
-  height: 300px;
-}
-.card_content h3 {
-  font-size: 14px;
-  letter-spacing: 0.06em;
-  height: 15px;
-  margin-bottom: 100px;
-} */
-
 * {
   box-sizing: border-box;
 }
 
 .skeleton {
-  /* content: ''; */
   animation: ske 2s linear infinite alternate;
   animation-duration: 2s;
   margin-bottom: 54px;
@@ -295,17 +285,14 @@ export default {
 }
 
 .skeleton-text:last-child {
-  width: 80%;
+  width: 70%;
   margin-bottom: 3px;
   height: 20px;
 }
 
 .grids {
   display: grid;
-  gap: 10px;
-  /* grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); */
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  /* padding: 1rem; */
+  grid-template-rows: 1fr 0.07fr;
 }
 
 .contain {
@@ -317,7 +304,6 @@ export default {
 }
 
 .contain img {
-  width: 300px;
   height: 300px;
   object-fit: cover;
   border-radius: 20px;
@@ -344,40 +330,58 @@ export default {
   color: rgb(255, 255, 255);
 }
 
-/* .grid {
-  column-gap: 0.7%;
-  display: grid;
-  grid-template-columns: 16.42% 12.35% 12.35% 12.5% 12.5% 12.35% 8.28% 8.28%;
-  grid-column-gap: 0.7%;
+.grids #card-template:nth-child(1) {
+  grid-column: 1 / 3;
 }
 
-.grid-gallery img {
-  border-radius: 4px;
-  height: auto;
-  width: 100%;
+.grids #card-template:nth-child(1) .contain,
+.grids #card-template:nth-child(1) .contain .boxs,
+.grids #card-template:nth-child(1) .contain {
+  width: 650px;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 20px;
 }
-*/
-.grids img:nth-of-type(1) {
-  grid-column: 1 / span 2;
-  grid-row: 1 / span 3;
-}
-
-.grids img:nth-of-type(2) {
-  grid-column: 1;
-  grid-row: 4 / span 2;
-}
-
-.grids img:nth-of-type(3) {
-  grid-column: 2;
-  grid-row: 4 / span 2;
-}
-
-.grids img:nth-of-type(4) {
-  align-self: end;
+.grids #card-template:nth-child(2) {
   grid-column: 3;
-  grid-row: 1 / span 5;
+  grid-row: 1 / span 2;
 }
 
+.grids #card-template:nth-child(2) .contain,
+.grids #card-template:nth-child(2) .contain .boxs,
+.grids #card-template:nth-child(2) .contain {
+  width: 300px;
+  height: 650px;
+  object-fit: cover;
+  border-radius: 20px;
+}
+.grids #card-template:nth-child(3) {
+  grid-column: 4;
+  grid-row: 1 / span 2;
+}
+
+.grids #card-template:nth-child(3) .contain,
+.grids #card-template:nth-child(3) .contain .boxs,
+.grids #card-template:nth-child(3) .contain {
+  width: 300px;
+  height: 650px;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+.grids #card-template:nth-child(6) {
+  grid-column: 2/ 4;
+  grid-row: 3;
+}
+
+.grids #card-template:nth-child(6) .contain,
+.grids #card-template:nth-child(6) .contain .boxs,
+.grids #card-template:nth-child(6) .contain {
+  width: 650px;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 20px;
+}
 .box {
   background-color: rgb(235, 193, 193);
   background-image: linear-gradient(
@@ -391,12 +395,11 @@ export default {
 }
 .contains {
   margin: 20px;
-  width: 300px;
+  width: 100%;
   position: absolute;
   top: 10px;
 }
 .boxs {
-  /* background-color: rgb(207, 34, 34); */
   background-image: linear-gradient(
     to right,
     rgb(170, 168, 168),
@@ -408,14 +411,13 @@ export default {
   width: 300px;
   height: 300px;
   opacity: 0.6;
-  /* background-color: rgb(223, 32, 32); */
+  border-radius: 20px;
+  cursor: pointer;
 }
 .skeleton1 {
-  /* content: ''; */
   animation: ske 1s linear infinite alternate;
   animation-duration: 2s;
   margin-bottom: 54px;
-  /* height: 90px; */
 }
 .skeleton-text1 {
   width: 92%;
@@ -442,34 +444,124 @@ export default {
     background-color: rgb(182, 182, 182);
   }
 }
-/* .h1txt {
-  background-image: linear-gradient(
-    to right,
-    rgb(138, 136, 136),
-    rgb(192, 192, 196)
-  );
-  animation: anmBg 2s infinite;
-  background-size: 200% 100%;
-  background-color: rgb(235, 193, 193);
-  width: 89%;
-}
-.smalltxt {
-  background-image: linear-gradient(
-    to right,
-    rgb(124, 124, 124),
-    rgb(135, 135, 148)
-  );
-  display: block;
-  background-size: 200% 100%;
-  background-color: rgb(235, 193, 193);
-  animation: anmBg 2s infinite;
-
-  width: 89%;
-}
- */
 @keyframes anmBg {
   to {
     background-position: -170% 0;
   }
+}
+
+.simple-modal {
+  width: 55vw;
+  height: 80vh;
+  box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.19);
+  position: fixed;
+  right: 25%;
+  left: 20%;
+  top: 10%;
+  /* top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); */
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.backdrop:after {
+  content: "";
+  width: 100%;
+  height: 100%;
+  background: black;
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  animation: backdrop 600ms ease forwards;
+}
+@keyframes backdrop {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 0.5;
+  }
+}
+
+/* // dynamically added classes by vue */
+.appear-enter-active {
+  animation: appear 700ms ease;
+}
+
+.appear-leave-active {
+  animation: appear 300ms ease reverse;
+}
+
+/* // keyframes? */
+@keyframes appear {
+  0% {
+    top: -100%;
+  }
+
+  2% {
+    height: 102;
+  }
+
+  5% {
+    height: 115%;
+  }
+
+  10% {
+    height: 120%;
+  }
+
+  20% {
+    height: 125%;
+  }
+
+  100% {
+    top: 10%;
+  }
+}
+.boxs_unique {
+  background-image: linear-gradient(
+    to right,
+    rgb(170, 168, 168),
+    rgb(211, 211, 211)
+  );
+  animation: anmBg 1s linear infinite both;
+  background-size: 200% 100%;
+  width: 55vw;
+  height: 80vh;
+  opacity: 0.6;
+  /* border-radius: 20px; */
+  /* cursor: pointer; */
+  /* background-color: black; */
+}
+.contain_unique {
+  width: 55vw;
+  height: 80vh;
+  background-color: black;
+}
+.contain_unique img {
+  width: 55vw;
+  height: 80vh;
+  object-fit: cover;
+}
+.contain_unique .text {
+  margin-top: -124px;
+  margin-left: 10px;
+  text-align: left;
+  position: relative;
+}
+
+.contain_unique .text h1 {
+  font-size: 28px;
+  font-weight: 600;
+  color: rgb(255, 255, 255);
+}
+
+.contain_unique .text h3 {
+  font-size: 20px;
+  color: rgb(255, 255, 255);
 }
 </style>
